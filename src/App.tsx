@@ -11,6 +11,7 @@ import { Footer } from './components/Footer/Footer';
 import { Status } from './types/Status';
 // eslint-disable-next-line max-len
 import { ErrorNotification } from './components/ErrorNotification/ErrorNotification';
+import { filterTodos } from './utils/filterTodos';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -19,8 +20,6 @@ export const App: React.FC = () => {
   const [statusOfTodos, setStatusOfTodos] = useState(Status.all);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [loadingIds, setloadingIds] = useState<number[]>([]);
-  const [deletingTodoId, setDeletingTodoId] = useState<number | null>(null);
-  //const [isEditing, setIsEdiding] = useState(false);
 
   function loadTodos() {
     setIsLoading(true);
@@ -47,19 +46,9 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  let filteredTodos = todos;
-
-  if (statusOfTodos === Status.active) {
-    filteredTodos = filteredTodos.filter(todo => !todo.completed);
-  }
-
-  if (statusOfTodos === Status.completed) {
-    filteredTodos = filteredTodos.filter(todo => todo.completed);
-  }
-
   async function handleDeleteTodo(id: number) {
     setloadingIds(prev => [...prev, id]);
-    setDeletingTodoId(id);
+    setloadingIds([id]);
 
     try {
       await deleteTodos(id);
@@ -67,7 +56,6 @@ export const App: React.FC = () => {
     } catch (error) {
       setErrorMessage('Unable to delete a todo');
     } finally {
-      setDeletingTodoId(null);
       setloadingIds(prev => prev.filter(todoId => todoId !== id));
     }
   }
@@ -78,7 +66,10 @@ export const App: React.FC = () => {
     completedTodo.forEach(todo => handleDeleteTodo(todo.id));
   }
 
-  const handleUpdateTodo = ({ id, title, completed }: Todo) => {
+  const handleUpdateTodo = (
+    { id, title, completed }: Todo,
+    onSuccess?: VoidFunction,
+  ) => {
     const todoToUpdate = todos.find(todo => todo.id === id);
 
     if (!todoToUpdate) {
@@ -99,6 +90,7 @@ export const App: React.FC = () => {
         setTodos(currentTodos =>
           currentTodos.map(todo => (todo.id === id ? updatedTodo : todo)),
         );
+        onSuccess?.();
       })
       .catch(() => {
         setErrorMessage('Unable to update a todo');
@@ -165,13 +157,12 @@ export const App: React.FC = () => {
 
         <section className="todoapp__main" data-cy="TodoList">
           <TodoList
-            todos={filteredTodos}
+            todos={filterTodos(todos, statusOfTodos)}
             setTodos={setTodos}
             tempTodo={tempTodo}
             isLoading={isLoading}
             setErrorMessage={setErrorMessage}
             handleDeleteTodo={handleDeleteTodo}
-            deletingTodoId={deletingTodoId}
             setloadingIds={setloadingIds}
             loadingIds={loadingIds}
             handleUpdateTodo={handleUpdateTodo}

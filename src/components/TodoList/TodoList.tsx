@@ -10,7 +10,6 @@ type Props = {
   setErrorMessage: (errorText: string) => void;
   handleDeleteTodo: (id: number) => void;
   setloadingIds: React.Dispatch<React.SetStateAction<number[]>>;
-  deletingTodoId: number | null;
   loadingIds: number[];
   handleUpdateTodo: (todo: Todo) => void;
 };
@@ -18,10 +17,10 @@ type Props = {
 export const TodoList: React.FC<Props> = ({
   todos,
   setTodos,
+  isLoading,
   tempTodo,
   handleDeleteTodo,
   setErrorMessage,
-  deletingTodoId,
   setloadingIds,
   loadingIds,
   handleUpdateTodo,
@@ -33,12 +32,12 @@ export const TodoList: React.FC<Props> = ({
           todo={todo}
           key={todo.id}
           handleDeleteTodo={handleDeleteTodo}
-          isDeleting={deletingTodoId === todo.id}
           setloadingIds={setloadingIds}
           setTodos={setTodos}
           loadingIds={loadingIds}
           setErrorMessage={setErrorMessage}
           handleUpdateTodo={handleUpdateTodo}
+          isLoading={isLoading}
         />
       ))}
       {tempTodo && <TempTodo todo={tempTodo} />}

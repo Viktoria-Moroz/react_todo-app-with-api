@@ -10,13 +10,12 @@ type Props = {
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   isLoading?: boolean;
   handleDeleteTodo: (id: number) => void;
-  isDeleting?: boolean;
   setloadingIds: (
     loading: number[] | ((prevLoading: number[]) => number[]),
   ) => void;
   loadingIds: number[];
   setErrorMessage: (string: string) => void;
-  handleUpdateTodo: (todo: Todo) => void;
+  handleUpdateTodo: (todo: Todo, onSuccess?: VoidFunction) => void;
 };
 
 export const TodoItem: React.FC<Props> = ({
@@ -24,7 +23,6 @@ export const TodoItem: React.FC<Props> = ({
   setTodos,
   isLoading,
   handleDeleteTodo,
-  isDeleting,
   setloadingIds,
   loadingIds,
   setErrorMessage,
@@ -53,6 +51,10 @@ export const TodoItem: React.FC<Props> = ({
       });
   }
 
+  const onSuccess: VoidFunction = () => {
+    setIsEditing(false);
+  };
+
   const editTodo = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -71,13 +73,16 @@ export const TodoItem: React.FC<Props> = ({
     }
 
     try {
-      await handleUpdateTodo({
-        ...todo,
-        title: trimmedTitle,
-      });
-      setIsEditing(false);
+      await handleUpdateTodo(
+        {
+          ...todo,
+          title: trimmedTitle,
+        },
+        onSuccess,
+      );
     } catch (error) {
-      setIsEditing(false);
+      //setIsEditing(false);
+      setIsEditing(true);
     }
   };
 
@@ -150,7 +155,7 @@ export const TodoItem: React.FC<Props> = ({
       <div
         data-cy="TodoLoader"
         className={cn('modal overlay', {
-          'is-active': isLoading || isDeleting || loadingIds.includes(todo.id),
+          'is-active': isLoading || loadingIds.includes(todo.id),
         })}
       >
         <div className="modal-background has-background-white-ter" />

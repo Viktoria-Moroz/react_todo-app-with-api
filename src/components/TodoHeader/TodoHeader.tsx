@@ -6,26 +6,28 @@ import cn from 'classnames';
 
 type Props = {
   todos: Todo[];
+  tempTodo: Todo | null;
   setErrorMessage: (arg: string) => void;
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   setTempTodo: (todo: Todo | null) => void;
-  isLoading: boolean;
-  setIsLoading: (arg: boolean) => void;
   toggleAllButton: () => void;
   completedTodos: boolean;
+  setloadingIds: React.Dispatch<React.SetStateAction<number[]>>;
+  loadingIds: number[];
 };
 
 export const TodoHeader: React.FC<Props> = ({
   todos,
+  tempTodo,
   setErrorMessage,
   setTodos,
   setTempTodo,
-  setIsLoading,
-  isLoading,
   toggleAllButton,
   completedTodos,
+  setloadingIds,
+  loadingIds,
 }) => {
-  const focusOnInput = useFocusInput();
+  const focusOnInput = useFocusInput(todos, tempTodo);
 
   const [title, setTitle] = useState('');
 
@@ -39,8 +41,6 @@ export const TodoHeader: React.FC<Props> = ({
       return;
     }
 
-    setIsLoading(true);
-
     const newTempTodo = {
       id: 0,
       title: trimmedTitle,
@@ -51,6 +51,8 @@ export const TodoHeader: React.FC<Props> = ({
     setTempTodo(newTempTodo);
 
     try {
+      setloadingIds(prevIds => [...prevIds, newTempTodo.id]);
+
       const newTodo = await addTodos({
         title: trimmedTitle,
         completed: false,
@@ -64,7 +66,7 @@ export const TodoHeader: React.FC<Props> = ({
       setErrorMessage('Unable to add a todo');
     } finally {
       setTempTodo(null);
-      setIsLoading(false);
+      setloadingIds(prevIds => prevIds.filter(id => id !== newTempTodo.id));
     }
   };
 
@@ -90,7 +92,7 @@ export const TodoHeader: React.FC<Props> = ({
           type="text"
           className="todoapp__new-todo"
           placeholder="What needs to be done?"
-          disabled={isLoading}
+          disabled={loadingIds.length > 0}
         />
       </form>
     </header>

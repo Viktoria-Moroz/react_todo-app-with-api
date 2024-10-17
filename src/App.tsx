@@ -146,13 +146,14 @@ export const App: React.FC = () => {
       <div className="todoapp__content">
         <TodoHeader
           todos={todos}
+          tempTodo={tempTodo}
           setErrorMessage={setErrorMessage}
           setTodos={setTodos}
           setTempTodo={setTempTodo}
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
           toggleAllButton={toggleAllButton}
           completedTodos={completedTodos}
+          setloadingIds={setloadingIds}
+          loadingIds={loadingIds}
         />
 
         <section className="todoapp__main" data-cy="TodoList">

@@ -30,7 +30,7 @@ export const TodoItem: React.FC<Props> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(todo.title);
-  const focusOnInput = useFocusInput();
+  const focusOnInput = useFocusInput(isEditing);
 
   function toggleCompleteTodo() {
     setloadingIds(prevIds => [...prevIds, todo.id]);
@@ -81,14 +81,12 @@ export const TodoItem: React.FC<Props> = ({
         onSuccess,
       );
     } catch (error) {
-      //setIsEditing(false);
       setIsEditing(true);
     }
   };
 
   const handleOnBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     editTodo(event);
-    setIsEditing(false);
   };
 
   const handleKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
